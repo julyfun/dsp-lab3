@@ -134,7 +134,7 @@ It can be seen that the overshoot of Kaiser window method is smaller than that o
 
 ==
 
-As the two frequencies are $f_1 = 7, f_2 = 24$, we can choose $f_c = 15$ as the cut-off frequency, therefore, the cut-off angular frequency is $w_c = 2 pi f_c / f_s$, where $f_s = 200$.
+As the two frequencies are $f_1 = 7, f_2 = 24$, we can choose $f_c = 15$ as the cut-off frequency, therefore, the cut-off angular frequency is $omega_c = 2 pi f_c / f_s$, where $f_s = 200$.
 
 Now we can apply all the steps in 2.b to get a high-pass filter. To refuce the overshoot, we applied the Kaiser window method to the _IDTFT_ result. The FRF of this filter is like:
 
@@ -220,4 +220,85 @@ The input ($x$, blue curve) and the output ($y$, orange curve) of the filter are
 Here we also plotted the signals with frequencies $f_1 = 5$ and $f_2 = 50$. It can be seen that these two frequencies are preserved and the component with the highest frequency $f_3 = 500$ in the blue curve are filtered out in the output signal.
 
 = Pole/Zero Designs
+
+==
+
+Idea: we want to design a filter with the zeros of $H(z)$ right at $f_c = 24$, so that the frequency of $24"Hz"$ is filterer out. Theres should also be a pole at around $f_c = 24$, so that the frequencies away from $24$ is not affected.
+
+As the coefficients of the difference equation are real, the roots of the numerator polynomial (named bz) and denominator polynomial (az) must be conjugate complex numbers.
+
+Let the digital cut-off angular frequency be $omega_c = 2 pi f_c / f_s$. The roots of bz should be $e^(j w_c)$ and $e^(-j w_c)$, and the roots of az should be $R e^(j w_c)$ and $R e^(-j w_c)$, where $R$ is a parameter to be determined. So we have:
+
+$
+  H(z) &= ((z - e^(j w_c)) (z - e^(-j w_c))) / ((z - R e^(j w_c)) (z - R e^(-j w_c))) \
+       &= (z ^ 2 - 2 cos(w_c) z + 1) / (z ^ 2 - 2 R cos(w_c) z + R ^ 2) \
+$
+
+From this Here $R$ will decide the bandwidth of the filter. Let's plot the bandwidth of $-3"dB"$ of different $R$ from $0.97$ to $1$. How do we get the bandwidth of an $R$? We can simply calculate the frequency responses into a list in python, and find the first frequency and the last frequency that the response is less than $-3"dB"$. The bandwidth is the difference between these two frequencies. Now the bandwidth-$R$ curve is like:
+
+#figure(image("pic/t4.a.1.png", width: 80%))
+
+Get the first $R$ in the list that makes the the band-width less than $1.00$, we can get the $R = 0.98383$. Good!
+
+Now we can get the right az and bz, plot the pole-zero map and the frequency response of the filter:
+
+#figure(image("pic/t4.a.2.png", width: 50%))
+#figure(image("pic/t4.a.3.png", width: 80%))
+#figure(image("pic/t4.a.4.png", width: 80%))
+#figure(image("pic/t4.a.5.png", width: 80%))
+
+In this figure 👆🏻,we can clearly see that the notch of $-3"dB"$ is between $23.5"Hz"$ and $24.5"Hz"$.
+
+==
+
+We just plot it here:
+
+#figure(image("pic/t4.b.1.png", width: 80%))
+
+The high frequency component is filtered out. The frequency spectra is in the last figure in 4.a.
+
+==
+
+To design a comb filter, we make $H(z)$ something like:
+
+#figure(image("pic/t4.c.5.png", width: 50%))
+
+Unlike for a notch filter, we can't simply put the poles on the unit circle to amplify the higher frequency, because this will make the system unstable. So after deciding $f_"peak" = 24$ and $omega_"peak" = 2 pi f_"peak" / f_s$, we still have 2 DoF: the radii of the poles and zeros. Getting a good tuples of radii is complicated, so here we use the theoretical method.
+
+To make the bandwidth of $1"Hz"$, we use the approximation method to analyze the conditions that two radii need to meet.
+
+#figure(image("pic/t4.c.6.png", width: 50%))
+
+We consider a tiny part of the unit circle close to the pole. $A B$ is a very small part of the unit circle, so it is approximately a line. At $omega = omega_"peak"$, the magnification is $y / x$ according to the property of a comb filter. To normalize the gain function, we will multiply bz by $x / y$. Given $x$ and $y$. We can deduce that the proper $Delta omega$ that makes that bandwidth $1"Hz"$ is: $ Delta omega = 2 pi times (1"Hz") / (2 f_s) $. Let's now find that condition that $x$ and $y$ should meet:
+
+$
+  q / p x / y = 1 / sqrt(2)
+$
+
+With all the variable positive real numbers. Square both sides:
+
+$
+  q^2 / p^2 x^2 / y^2 = 1 / 2
+$
+
+Using the Pythagorean theorem:
+
+$
+  ((y^2 + Delta omega^2) x^2) / ((x^2 + Delta omega^2) y^2) = 1 / 2
+$
+
+Shift the terms:
+
+$
+  x^2 = (Delta omega^2 y^2) / (2 Delta omega^2 + y^2)
+$
+
+As $x, y, Delta omega > 0$:
+
+$
+  x = (Delta omega y) / sqrt(2 Delta omega^2 + y^2)
+$
+
+There's now only $1$ DoF: the radius of the zero point (or the pole point, they are limited by the equation above). It should be close to $1$ in order that frequencies away from $f_"peak"$ are not affected (and after normalization, they are elimited).
+
 
