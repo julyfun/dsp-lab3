@@ -162,3 +162,62 @@ It can be verified from the plot that the signal of frequency $7$ is filtered ou
 
 Let the sampling number be $n = 600$, we can get the remaining amplitude by $A = 2 / n sup{||y_1||}$. The result of the code is $3.79$, which is close to $4$.
 
+= Design an IIR filter with bilinear transform and realize filtering
+
+==
+
+Let the input signal in the complex field be $underline(U_i)$, output signal $underline(U_o)$, the current intensity $underline(i)$ we have the equation in the circuit:
+
+$
+  underline(U_o) = underline(U_i) (C integral underline(i) dif t) / (C integral underline(i) dif t + underline(i) R + L (dif underline(i)) / (dif t))
+$
+
+Apply the Laplace transform to the equation, we can get the transfer function of the circuit:
+
+$
+  H(s) = underline(U_o) / underline(U_i) = 1 / (R + L s + 1 / (C s))
+$
+
+==
+
+Apply the bilinear method, where $T = 1 / f_s$:
+
+$
+  H(z) &= H(s) |_(s = 2 / T (z - 1) / (z + 1)) \
+       &= 1 / (1 + R C 2 / T (z - 1) / (z + 1) + L C 4 / (T ^ 2) (z - 1) ^ 2 / ((z + 1) ^ 2)) \
+       &= (z ^ 2 + 2 z + 1) / (z ^ 2 (1 + (2 R C) / T + L C) + z (2 - 2 L C) + 1 - (2 R C) / T + L C 4 / (T ^ 2)) \
+       &= (z ^ 2 + 2 z + 1) / (z ^ 2 (1 + 2 R C f_s + L C) + z (2 - 2 L C) + 1 - 2 R C f_s + 4 L C f_s ^ 2)
+$
+
+Let $a_1 = 1 + 2 R C f_s + L C$, we can We can divide both the numerator and denominator by $a_1$ to get the coefficients of the difference equation.
+
+==
+
+Set the $f_s = 23966.14"Hz"$ (to be obtained later), The FRF of the analog filter and the digital filter are:
+
+#figure(image("pic/t3.c.4.png", width: 80%))
+#figure(image("pic/t3.c.5.png", width: 80%))
+
+At $f_"input" = 1000"Hz"$, we can plot the difference between the output of the analog filter and the digital filter for different sampling frequencies between $10000$ and $50000$ in $"dB"$:
+
+#figure(image("pic/t3.c.1.png", width: 80%))
+
+As we can see in the figure, the minimum $f_s$ that makes the difference less than $0.1"dB"$ is around $23966.14"Hz"$.
+
+Their magnitudes and in $"dB"$ and phases in radians are:
+
+#figure(image("pic/t3.c.2.png", width: 80%))
+#figure(image("pic/t3.c.3.png", width: 80%))
+
+This is a low-pass filter with its cut-off frequency $f_c = 51.33"Hz"$ (obtained by the code, where the gain is $-3"dB"$).
+
+==
+
+The input ($x$, blue curve) and the output ($y$, orange curve) of the filter are as follows:
+
+#figure(image("pic/t3.d.1.png", width: 80%))
+
+Here we also plotted the signals with frequencies $f_1 = 5$ and $f_2 = 50$. It can be seen that these two frequencies are preserved and the component with the highest frequency $f_3 = 500$ in the blue curve are filtered out in the output signal.
+
+= Pole/Zero Designs
+
