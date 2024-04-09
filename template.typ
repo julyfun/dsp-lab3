@@ -240,6 +240,17 @@ From this Here $R$ will decide the bandwidth of the filter. Let's plot the bandw
 
 Get the first $R$ in the list that makes the the band-width less than $1.00$, we can get the $R = 0.98383$. Good!
 
+$
+  H(z) &= (z ^ 2 - 2 cos(w_c) z + 1) / (z ^ 2 - 2 R cos(w_c) z + R ^ 2) \
+       &tilde.eq (z ^ 2 - 1.46 z + 1) / (z ^ 2 - 1.43 z + 0.968 ^ 2)
+$
+
+The difference equation:
+
+$
+  y[n] - 1.46 y[n - 1] + 0.968 ^ 2 y[n - 2] = x[n] - 1.46 x[n - 1] + x[n - 2]
+$
+
 Now we can get the right az and bz, plot the pole-zero map and the frequency response of the filter:
 
 #figure(image("pic/t4.a.2.png", width: 50%))
@@ -263,13 +274,17 @@ To design a comb filter, we make $H(z)$ something like:
 
 #figure(image("pic/t4.c.5.png", width: 50%))
 
-Unlike for a notch filter, we can't simply put the poles on the unit circle to amplify the higher frequency, because this will make the system unstable. So after deciding $f_"peak" = 24$ and $omega_"peak" = 2 pi f_"peak" / f_s$, we still have 2 DoF: the radii of the poles and zeros. Getting a good tuples of radii is complicated, so here we use the theoretical method.
+$
+  H(z) &= (z ^ 2 - 2 R_"zero" cos(w_c) z + R_"zero"^2) / (z ^ 2 - 2 R_"pole" cos(w_c) z + R_"pole" ^ 2) \
+$
+
+Unlike for a notch filter, we can't simply put the poles on the unit circle to amplify the higher frequency, because this will make the system unstable. So after deciding $f_"peak" = 24$ and $omega_"peak" = 2 pi f_"peak" / f_s$, we still have 2 DoF: the radii of the poles $R_"pole"$ and of zeros $R_"zero"$. Getting a good tuples of radii is complicated, so here we use the theoretical method.
 
 To make the bandwidth of $1"Hz"$, we use the approximation method to analyze the conditions that two radii need to meet.
 
 #figure(image("pic/t4.c.6.png", width: 50%))
 
-We consider a tiny part of the unit circle close to the pole. $A B$ is a very small part of the unit circle, so it is approximately a line. At $omega = omega_"peak"$, the magnification is $y / x$ according to the property of a comb filter. To normalize the gain function, we will multiply bz by $x / y$. Given $x$ and $y$. We can deduce that the proper $Delta omega$ that makes that bandwidth $1"Hz"$ is: $ Delta omega = 2 pi times (1"Hz") / (2 f_s) $. Let's now find that condition that $x$ and $y$ should meet:
+We consider a tiny part of the unit circle close to the pole. $A B$ is a very small part of the unit circle, so it is approximately a line. At $omega = omega_"peak"$, the magnification is $y / x$ according to the property of a comb filter. To normalize the gain function, we will multiply bz by $x / y$. Given $x$ and $y$. We can deduce that the proper $Delta omega$ that makes that bandwidth $1"Hz"$ is: $ Delta omega = 2 pi times (1"Hz") / (2 f_s) tilde.eq 0.0157 $. Let's now find that condition that $x$ and $y$ should meet:
 
 $
   q / p x / y = 1 / sqrt(2)
@@ -301,4 +316,43 @@ $
 
 There's now only $1$ DoF: the radius of the zero point (or the pole point, they are limited by the equation above). It should be close to $1$ in order that frequencies away from $f_"peak"$ are not affected (and after normalization, they are elimited).
 
+On the other hand, the magnification is $y / x$. Likewise, we deduce that: $ y / x = sqrt(2 + y ^ 2 / w^2) $
 
+The figure of magnification-$y$:
+
+#figure(image("pic/t4.c.7.png", width: 80%))
+Larger the $y$, larger the magnification. We can set $y = 0.15$ for magnification $y / x tilde.eq 9.65 = 19.7"dB"$. We then have $x tilde.eq 0.0155, R_"zero" = 0.85, R_"pole" tilde.eq 0.9845$, and the transfer function:
+
+$
+  H(z) &tilde.eq 1 / 9.65 times (z ^ 2 - 1.70 z + 0.722) / (z ^ 2 - 1.97 z + 0.969 ^ 2) \
+       &tilde.eq (0.104 z ^ 2 - 0.130 z + 0.0748) / (z ^ 2 - 1.97 z + 0.969 ^ 2)
+$
+
+The difference equation:
+
+$
+  y[n] - 1.97 y[n - 1] + 0.969 ^ 2 y[n - 2] = 0.104 x[n] - 0.130 x[n - 1] + 0.0748 x[n - 2]
+$
+
+Plotting the poles and zeros:
+
+#figure(image("pic/t4.c.1.png", width: 50%))
+
+FRFs:
+
+#figure(image("pic/t4.c.2.png", width: 80%))
+#figure(image("pic/t4.c.3.png", width: 80%))
+
+==
+
+Time sequences:
+
+#figure(image("pic/t4.d.1.png", width: 80%))
+
+The frequency spectra:
+
+#figure(image("pic/t4.c.4.png", width: 80%))
+
+The higher frequency of $24$ is preserved. 
+
+= Appendix Code (Python)
